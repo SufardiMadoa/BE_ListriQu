@@ -1,0 +1,70 @@
+-- ENUM type harus dibuat dulu
+CREATE TYPE status_enum AS ENUM ('Active', 'Inactive');
+CREATE TYPE session_status_enum AS ENUM ('Active', 'Logout');
+
+CREATE TABLE MASTER_ROLE (
+    role_id SERIAL PRIMARY KEY,
+    role_code VARCHAR(50) UNIQUE NOT NULL,
+    role_name VARCHAR(100) NOT NULL,
+    description VARCHAR(255),
+    status status_enum DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE MASTER_USER (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100),
+    phone VARCHAR(20),
+    unit_id INT,
+    role_id INT,
+    status status_enum DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by INT,
+    updated_by INT,
+    FOREIGN KEY (role_id) REFERENCES MASTER_ROLE(role_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE MASTER_MENU (
+    menu_id SERIAL PRIMARY KEY,
+    parent_id INT,
+    menu_code VARCHAR(50) UNIQUE NOT NULL,
+    menu_name VARCHAR(100) NOT NULL,
+    menu_icon VARCHAR(100),
+    menu_url VARCHAR(255),
+    menu_order INT DEFAULT 0,
+    is_active status_enum DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by INT,
+    updated_by INT,
+    FOREIGN KEY (parent_id) REFERENCES MASTER_MENU(menu_id)
+);
+
+CREATE TABLE ROLE_MENU (
+    role_menu_id SERIAL PRIMARY KEY,
+    role_id INT,
+    menu_id INT,
+    is_active status_enum DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (role_id, menu_id),
+    FOREIGN KEY (role_id) REFERENCES MASTER_ROLE(role_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (menu_id) REFERENCES MASTER_MENU(menu_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE USER_SESSIONS (
+    session_id SERIAL PRIMARY KEY,
+    user_id INT,
+    session_token VARCHAR(255) UNIQUE NOT NULL,
+    login_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    logout_at TIMESTAMP DEFAULT NULL,
+    ip_address VARCHAR(50),
+    user_agent VARCHAR(255),
+    status session_status_enum DEFAULT 'Active',
+    FOREIGN KEY (user_id) REFERENCES MASTER_USER(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
