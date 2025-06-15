@@ -1,5 +1,8 @@
 package org.listriqu.response;
 
+import org.listriqu.dto.MenuDTO;
+import java.util.List;
+
 public class LoginResponse {
     public String status;
     public String message;
@@ -11,7 +14,9 @@ public class LoginResponse {
         public String full_name;
         public Integer role_id;
         public String token;
-        // Tambahkan menu dsb jika sudah implementasi role-menu
+        public List<MenuDTO> menus;
+
+        // Getter Setter
 
         public Integer getUser_id() {
             return user_id;
@@ -51,6 +56,14 @@ public class LoginResponse {
 
         public void setToken(String token) {
             this.token = token;
+        }
+
+        public List<MenuDTO> getMenus() {
+            return menus;
+        }
+
+        public void setMenus(List<MenuDTO> menus) {
+            this.menus = menus;
         }
     }
 }
