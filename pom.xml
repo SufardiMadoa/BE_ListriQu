@@ -86,6 +86,10 @@
     <artifactId>commons-codec</artifactId>
     <!-- <version>1.16.0</version> -->
 </dependency>
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-flyway</artifactId>
+</dependency>
     </dependencies>
 
     <build>
