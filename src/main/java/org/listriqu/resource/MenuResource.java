@@ -1,51 +1,103 @@
 package org.listriqu.resource;
 
+import org.listriqu.dto.MenuRequest;
+import org.listriqu.response.ApiResponse;
+import org.listriqu.response.ErrorResponse;
+import org.listriqu.response.SuccesResponse;
+import org.listriqu.service.MenuService;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.listriqu.dto.MenuRequest;
-import org.listriqu.service.MenuService;
 
 @Path("/api/v1/menu")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@RolesAllowed({ "USER", "ADMIN" })
+@RolesAllowed({  "SUPERADMIN", "USER", "ADMIN" })
 public class MenuResource {
 
     @Inject
     MenuService menuService;
 
     @GET
-
+    @SuppressWarnings("CallToPrintStackTrace")
     public Response getAll() {
-        return Response.ok(menuService.getAllMenus()).build();
+        try {
+            Object menu = menuService.getAllMenus();
+            return Response.ok(new ApiResponse("success", menu)).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Internal server error"))
+                    .build();
+        }
     }
 
     @GET
     @Path("/{id}")
-    public Response getById(@PathParam("id") Long id) {
-        return Response.ok(menuService.getMenuById(id)).build();
+    @SuppressWarnings("CallToPrintStackTrace")
+    public Response getById(@PathParam("id") Integer id) {
+         try {
+        Object menu = menuService.getMenuById(id);
+        return Response.ok(new ApiResponse("success", menu)).build();
+         } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Internal server error"))
+                    .build();
+        }
     }
 
     @POST
+    @SuppressWarnings("CallToPrintStackTrace")
     public Response create(MenuRequest request) {
+         try {
         menuService.createMenu(request);
-        return Response.ok().build();
+        return Response.ok(new SuccesResponse("Success", "Role menu assigned successfully")).build();
+      } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Internal server error"))
+                    .build();
+        }
     }
 
     @PUT
     @Path("/{id}")
-    public Response update(@PathParam("id") Long id, MenuRequest request) {
+    @SuppressWarnings("CallToPrintStackTrace")
+    public Response update(@PathParam("id") Integer id, MenuRequest request) {
+         try {
         menuService.updateMenu(id, request);
         return Response.ok().build();
+  } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Internal server error"))
+                    .build();
+        }
     }
 
     @DELETE
     @Path("/{id}")
-    public Response delete(@PathParam("id") Long id) {
+    @SuppressWarnings("CallToPrintStackTrace")
+    public Response delete(@PathParam("id") Integer id) {
+         try {
         menuService.deleteMenu(id);
-        return Response.ok().build();
+        return Response.ok(new SuccesResponse("Success", "Menu deleted successfully")).build();
+      } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Internal server error"))
+                    .build();
+        }
     }
 }

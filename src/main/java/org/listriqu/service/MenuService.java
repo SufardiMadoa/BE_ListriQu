@@ -6,15 +6,27 @@ import java.util.stream.Collectors;
 
 import org.listriqu.dto.MenuRequest;
 import org.listriqu.entity.MasterMenu;
+import org.listriqu.entity.MasterRole;
+import org.listriqu.entity.RoleMenu;
 import org.listriqu.enums.StatusEnum;
+import org.listriqu.repository.MasterRoleRepository;
 import org.listriqu.repository.MenuRepository;
+import org.listriqu.repository.RoleMenuRepository;
 import org.listriqu.response.MenuResponse;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.WebApplicationException;
 
 @ApplicationScoped
 public class MenuService {
+
+    @Inject
+    MasterRoleRepository masterRoleRepository;
+
+    @Inject
+    RoleMenuRepository roleMenuRepository;
 
     private final MenuRepository menuRepository;
 
@@ -23,10 +35,18 @@ public class MenuService {
     }
 
     public List<MenuResponse> getAllMenus() {
-        return menuRepository.listAll().stream().map(this::toResponse).collect(Collectors.toList());
+        try {
+            return menuRepository.listAll()
+                    .stream()
+                    .map(this::toResponse)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to get menus", e);
+        }
     }
 
-    public MenuResponse getMenuById(Long id) {
+    public MenuResponse getMenuById(Integer id) {
         MasterMenu menu = menuRepository.findById(id);
         return toResponse(menu);
     }
@@ -56,12 +76,24 @@ public class MenuService {
         menu.setMenuOrder(request.getMenu_order());
         menu.setCreatedAt(LocalDateTime.now());
         menu.setUpdatedAt(LocalDateTime.now());
-
+        menu.setIsActive(StatusEnum.Active);
         menuRepository.persist(menu);
+
+        // Setelah berhasil insert menu, assign otomatis ke SUPERADMIN
+        MasterRole superAdminRole = masterRoleRepository.find("roleCode", "SUPERADMIN").firstResult();
+        if (superAdminRole != null) {
+            RoleMenu roleMenu = new RoleMenu();
+            roleMenu.setRole(superAdminRole);
+            roleMenu.setMenu(menu);
+            roleMenu.setIsActive(StatusEnum.Active);
+            roleMenu.setCreatedAt(LocalDateTime.now());
+            roleMenu.setUpdatedAt(LocalDateTime.now());
+            roleMenuRepository.persist(roleMenu);
+        }
     }
 
     @Transactional
-    public void updateMenu(Long menuId, MenuRequest request) {
+    public void updateMenu(Integer menuId, MenuRequest request) {
         MasterMenu menu = menuRepository.findById(menuId);
         if (menu == null) {
             throw new IllegalArgumentException("Menu not found");
@@ -76,10 +108,20 @@ public class MenuService {
     }
 
     @Transactional
-    public void deleteMenu(Long menuId) {
+    public void deleteMenu(Integer menuId) {
         MasterMenu menu = menuRepository.findById(menuId);
         if (menu != null) {
+            // Cek apakah menuId sedang direferensikan oleh entri lain
+            boolean isReferenced = menuRepository.isMenuIdReferencedAsParent(menuId);
+            if (isReferenced) {
+                throw new WebApplicationException("Gagal menghapus: menu masih digunakan sebagai parent oleh menu lain",
+                        409);
+            }
+
             menuRepository.delete(menu);
+        } else {
+            throw new WebApplicationException("Menu tidak ditemukan", 404);
         }
     }
+
 }

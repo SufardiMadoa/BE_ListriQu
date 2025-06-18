@@ -1,10 +1,5 @@
 package org.listriqu.security;
 
-import io.smallrye.jwt.build.Jwt;
-import io.smallrye.jwt.auth.principal.JWTParser;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,6 +7,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.smallrye.jwt.auth.principal.DefaultJWTCallerPrincipal;
+import io.smallrye.jwt.auth.principal.JWTParser;
+import io.smallrye.jwt.build.Jwt;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class JwtUtils {
@@ -37,8 +36,6 @@ public class JwtUtils {
                 .issuer("listriqu-app")
                 .sign();
     }
-
-
 
     public boolean validateToken(String token) {
         try {

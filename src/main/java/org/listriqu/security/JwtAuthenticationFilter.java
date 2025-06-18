@@ -1,10 +1,12 @@
 package org.listriqu.security;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.listriqu.response.ErrorResponse;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
@@ -23,7 +25,7 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
         String path = requestContext.getUriInfo().getPath();
 
         // Allow list (public endpoints)
-        if (path.equals("/api/auth/login") || path.equals("/api/auth/register")) {
+        if (path.equals("/api/v1/auth/login") || path.equals("/api/v1/auth/register")) {
             return;
         }
 
@@ -54,6 +56,8 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
     }
 
     private void abort(ContainerRequestContext requestContext, String message) {
-        requestContext.abortWith(jakarta.ws.rs.core.Response.status(401).entity(message).build());
+        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
+                .entity(new ErrorResponse(message))
+                .build());
     }
 }
