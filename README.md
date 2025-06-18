@@ -1,8 +1,8 @@
 
 # Code with Quarkus
-https://github.com/users/SufardiMadoa/projects/6
+
 ## Backlog Pengerjaan
-lihat track pengerjaan saya **[ListriQu]((https://github.com/users/SufardiMadoa/projects/6))**
+[lihat track pengerjaan saya **[ListriQu]((https://github.com/users/SufardiMadoa/projects/6))**](https://github.com/users/SufardiMadoa/projects/6)
 
 
 Proyek ini dibangun menggunakan **[Quarkus](https://quarkus.io/)** – *Supersonic Subatomic Java Framework* yang cepat, ringan, dan cocok untuk Java di era cloud-native.
